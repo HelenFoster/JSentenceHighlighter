@@ -13,8 +13,7 @@ def katakanaToHiragana(s):
 
 class WordFinder:
     def __init__(self, conf):
-        self.startTag = conf.startTag
-        self.endTag = conf.endTag
+        self.conf = conf
         self.doneAlreadyFinder = re.compile(conf.doneAlreadyRegex)
         with open(conf.deinflectionFile) as f:
             srcdic = json.load(f)
@@ -52,7 +51,7 @@ class WordFinder:
             return None
         word = katakanaToHiragana(word)
         sentence = katakanaToHiragana(sentence)
-        for conj in self.makeInflections(word, "any", 2):
+        for conj in self.makeInflections(word, "any", self.conf.maxInflectionDepth):
             if conj in sentence:
                 return (sentence.index(conj), len(conj))
         return None
@@ -77,7 +76,9 @@ class WordFinder:
                 result["desc"] = "no match"
             else:
                 (pos, length) = match
-                result["new sentence"] = sentence[:pos] + self.startTag + sentence[pos:pos+length] + self.endTag + sentence[pos+length:]
+                result["new sentence"] = sentence[:pos] + self.conf.startTag
+                result["new sentence"] += sentence[pos:pos+length]
+                result["new sentence"] += self.conf.endTag + sentence[pos+length:]
                 result["matched"] = True
         return result
 

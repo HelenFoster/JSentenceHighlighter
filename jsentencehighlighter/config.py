@@ -33,5 +33,10 @@ progName = "JSentenceHighlighter"
 #Anki tag to add to matched notes.
 matchedTag = progName + "Matched"
 
+#Maximum number of inflections to apply to a word at one time.
+#Runtime will increase exponentially with this number!
+#2 is enough for the vast majority of cases.
+maxInflectionDepth = 2
+
 #Path to the deinflection dictionary.
 deinflectionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "deinflect.json")
