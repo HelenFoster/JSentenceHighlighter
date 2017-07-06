@@ -12,13 +12,6 @@ def highlightSentences():
     import jsentencehighlighter.config as conf
     reload (conf)
     
-    wordFinder = core.WordFinder(conf)
-    
-    if conf.targetField is not None:
-        reply = QMessageBox.question(mw, conf.progName, "Really overwrite %s?" % conf.targetField,
-            QMessageBox.Yes, QMessageBox.No)
-        if reply != QMessageBox.Yes:
-            return
     model = mw.col.models.byName(conf.noteType)
     if model is None:
         QMessageBox.warning(mw, conf.progName, "Can't find note type")
@@ -34,13 +27,27 @@ def highlightSentences():
         QMessageBox.warning(mw, conf.progName, "Can't find sentence field")
         return
     if conf.targetField is not None and conf.targetField not in fieldNames:
-        QMessageBox.warning(mw, conf.progName, "Can't find target")
+        QMessageBox.warning(mw, conf.progName, "Can't find target field")
         return
+    if conf.targetField is not None:
+        reply = QMessageBox.question(mw, conf.progName, "Really overwrite %s?" % conf.targetField,
+            QMessageBox.Yes, QMessageBox.No)
+        if reply != QMessageBox.Yes:
+            return
+        mw.checkpoint("Highlight sentences") #undo
+    
+    try:
+        wordFinder = core.WordFinder(conf)
+    except IOError:
+        QMessageBox.warning(mw, conf.progName, "Can't load inflection dictionary")
+        return
+    
     currentTime = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
     logName = conf.progName + "_%s.log" % currentTime
     logPath = os.path.normpath(os.path.join(mw.col.media.dir(), "..", logName)) #in user profile folder
     outcomeCounts = collections.Counter()
     mw.progress.start(label="Working...", immediate=True)
+    
     try:
         with open(logPath, "w") as logFile:
             nids = mw.col.findNotes("mid:" + str(model["id"]))
