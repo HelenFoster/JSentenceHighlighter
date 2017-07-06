@@ -54,7 +54,9 @@ class WordFinder:
             return None
         word = katakanaToHiragana(word)
         sentence = katakanaToHiragana(sentence)
-        for conj in self.makeInflections(word, "any", self.conf.maxInflectionDepth):
+        conjs = self.makeInflections(word, "any", self.conf.maxInflectionDepth)
+        conjs.sort(key=len, reverse=True)
+        for conj in conjs:
             if conj in sentence:
                 return (sentence.index(conj), len(conj))
         return None
