@@ -75,8 +75,8 @@ def highlightSentences():
                             note.removeTag(conf.matchedTag)
                     note.flush()
             logFile.write("\nTOTALS\n")
-            for (outcome, num) in outcomeCounts.items():
-                logFile.write(outcome + "\t" + str(num) + "\n")
+            for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence"]:
+                logFile.write(outcome + "\t" + str(outcomeCounts[outcome]) + "\n")
             mw.progress.finish()
             QMessageBox.information(mw, conf.progName, "Done")
     except IOError:
