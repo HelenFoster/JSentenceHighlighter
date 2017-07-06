@@ -25,6 +25,9 @@ class WordFinder:
                 newRule["kanaInf"] = rule["kanaIn"]
                 newRule["typesRaw"] = rule["rulesOut"]
                 
+                if newRule["kanaRaw"] == "":
+                    continue  #skipping -na (not needed and causes problems)
+                
                 nRI = len(rule["rulesIn"])
                 if nRI == 0:
                     newRule["typeInf"] = "end"
