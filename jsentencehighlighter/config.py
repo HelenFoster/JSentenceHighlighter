@@ -23,8 +23,10 @@ wordField2 = "kana"
 #Field to get the original sentence from.
 sentenceField = "yc-sentence"
 
-#Field to write the results - WILL BE OVERWRITTEN - set to None for a dry run.
-#(Can be the same as sentenceField - this changes tagging behaviour.)
+#Field to write the results - WILL BE OVERWRITTEN.
+#Set to None for a dry run - create the log file without changing the deck.
+#Can be the same as sentenceField - then tags from previous runs remain.
+#Otherwise, tags from previous runs are removed (if matchedTag is unchanged).
 targetField = None
 
 #Program name used in messages and the log filename.
