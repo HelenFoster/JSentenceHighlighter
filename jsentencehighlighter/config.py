@@ -27,11 +27,11 @@ sentenceField = "yc-sentence"
 #(Can be the same as sentenceField - this changes tagging behaviour.)
 targetField = None
 
-#Program name used in messages, note tags, and the log filename.
+#Program name used in messages and the log filename.
 progName = "JSentenceHighlighter"
 
 #Anki tag to add to matched notes.
-matchedTag = progName + "Matched"
+matchedTag = "JSH-matched"
 
 #Maximum number of inflections to apply to a word at one time.
 #Runtime will increase exponentially with this number!
