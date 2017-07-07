@@ -79,7 +79,7 @@ def highlightSentences():
                         if result["matched"]:
                             note.addTag(conf.matchedTag)
                         else:
-                            note.removeTag(conf.matchedTag)
+                            note.delTag(conf.matchedTag)
                     note.flush()
             logFile.write("\nTOTALS\n")
             for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence"]:
