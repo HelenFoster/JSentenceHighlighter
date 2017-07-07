@@ -42,7 +42,7 @@ def highlightSentences():
         QMessageBox.warning(mw, conf.progName, "Can't load inflection dictionary")
         return
     
-    currentTime = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
+    currentTime = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
     logName = conf.progName + "_%s.log" % currentTime
     logPath = os.path.normpath(os.path.join(mw.col.media.dir(), "..", logName)) #in user profile folder
     outcomeCounts = collections.Counter()
