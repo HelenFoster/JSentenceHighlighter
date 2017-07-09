@@ -14,10 +14,10 @@ endTag = "</b>"
 #Note type to modify.
 noteType = "vocab"
 
-#High priority word field (usually the expression field).
+#High priority word field (usually the vocab expression field).
 wordField1 = "expression"
 
-#Low priority word field (usually the reading field) - can be None.
+#Low priority word field (usually the vocab reading field) - can be None.
 wordField2 = "kana"
 
 #Field to get the original sentence from.
@@ -41,4 +41,5 @@ matchedTag = "JSH-matched"
 maxInflectionDepth = 2
 
 #Path to the deinflection dictionary.
+#(If you're just using the addon, you don't need to change this.)
 deinflectionFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "deinflect.json")
