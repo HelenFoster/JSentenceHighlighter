@@ -10,12 +10,26 @@
 from aqt import mw
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction
+from anki.hooks import addHook
 
-def highlightSentences():
+def highlightSentences(nids = None):
     import jsentencehighlighter.run as run
     reload (run)
-    run.highlightSentences()
+    run.highlightSentences(nids)
 
 action = QAction("Highlight sentences", mw)
 mw.connect(action, SIGNAL("triggered()"), highlightSentences)
 mw.form.menuTools.addAction(action)
+
+def setupMenu(browser):
+    buttonText = "Highlight Japanese Sentences"
+    a = QAction(buttonText, browser)
+    browser.connect(a, SIGNAL("triggered()"), lambda e=browser: onRegenerate(e))
+    browser.form.menuEdit.addSeparator()
+    browser.form.menuEdit.addAction(a)
+
+
+def onRegenerate(browser):
+    highlightSentences(browser.selectedNotes())
+
+addHook("browser.setupMenus", setupMenu)
