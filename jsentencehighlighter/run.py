@@ -6,7 +6,7 @@ import os, datetime, collections, json
 from aqt import mw
 from PyQt4.QtGui import QMessageBox
 
-def highlightSentences():
+def highlightSentences(nids=None):
     import jsentencehighlighter.core as core
     reload (core)
     import jsentencehighlighter.config as conf
@@ -50,7 +50,8 @@ def highlightSentences():
     
     try:
         with open(logPath, "w") as logFile:
-            nids = mw.col.findNotes("mid:" + str(model["id"]))
+            if not nids:
+                nids = mw.col.findNotes("mid:" + str(model["id"]))
             for nid in nids:
                 note = mw.col.getNote(nid)
                 sentence = note[conf.sentenceField]
@@ -89,3 +90,5 @@ def highlightSentences():
     except IOError:
         mw.progress.finish()
         QMessageBox.warning(mw, conf.progName, "Error writing log file")
+
+
