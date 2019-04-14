@@ -6,7 +6,7 @@ import os, datetime, collections, json
 from aqt import mw
 from PyQt4.QtGui import QMessageBox
 
-def highlightSentences(nids=None):
+def highlightSentences(browserNids=None):
     import jsentencehighlighter.core as core
     reload (core)
     import jsentencehighlighter.config as conf
@@ -29,8 +29,23 @@ def highlightSentences(nids=None):
     if conf.targetField is not None and conf.targetField not in fieldNames:
         QMessageBox.warning(mw, conf.progName, "Can't find target field")
         return
+    
+    outcomeCounts = collections.Counter()
+    usableNids = mw.col.findNotes("mid:" + str(model["id"]))
+    if browserNids is None:
+        nids = usableNids
+    else:
+        usableNids = set(usableNids)
+        #keeping browserNids order here for log file, but not sure if it means anything
+        nids = [nid for nid in browserNids if nid in usableNids]
+        outcomeCounts["wrong type"] = len(browserNids) - len(nids)
+    if nids == []:
+        QMessageBox.warning(mw, conf.progName, "No notes to process")
+        return
+    
     if conf.targetField is not None:
-        reply = QMessageBox.question(mw, conf.progName, "Really overwrite %s?" % conf.targetField,
+        reply = QMessageBox.question(mw, conf.progName,
+            "Really overwrite %s for %d notes?" % (conf.targetField, len(nids)),
             QMessageBox.Yes, QMessageBox.No)
         if reply != QMessageBox.Yes:
             return
@@ -45,13 +60,10 @@ def highlightSentences(nids=None):
     currentTime = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
     logName = conf.progName + "_%s.log" % currentTime
     logPath = os.path.normpath(os.path.join(mw.col.media.dir(), "..", logName)) #in user profile folder
-    outcomeCounts = collections.Counter()
     mw.progress.start(label="Working...", immediate=True)
     
     try:
         with open(logPath, "w") as logFile:
-            if not nids:
-                nids = mw.col.findNotes("mid:" + str(model["id"]))
             for nid in nids:
                 note = mw.col.getNote(nid)
                 sentence = note[conf.sentenceField]
@@ -83,12 +95,10 @@ def highlightSentences(nids=None):
                             note.delTag(conf.matchedTag)
                     note.flush()
             logFile.write("\nTOTALS\n")
-            for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence"]:
+            for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence", "wrong type"]:
                 logFile.write(outcome + "\t" + str(outcomeCounts[outcome]) + "\n")
             mw.progress.finish()
             QMessageBox.information(mw, conf.progName, "Done")
     except IOError:
         mw.progress.finish()
         QMessageBox.warning(mw, conf.progName, "Error writing log file")
-
-

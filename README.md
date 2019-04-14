@@ -18,7 +18,7 @@ Copy JSentenceHighlighter.py and the jsentencehighlighter directory into the Ank
 
 Edit config.py to match your deck. See the comments in the file for what each variable means.
 
-Restart Anki and "Highlight sentences" should appear on the Tools menu. This runs the highlighting operation as defined in config.py. (The config is auto-reloaded at the start of each run, so you don't need to restart Anki again after changing something.)
+Restart Anki. "Highlight all sentences" should appear on the Tools menu of the main window, and "Highlight selected sentences" on the Edit menu of the browser. These run the highlighting operation as defined in config.py. Selected notes with different types than the type specified in the config will be ignored. (The config is auto-reloaded at the start of each run, so you don't need to restart Anki again after changing something.)
 
 After each run, the addon places a timestamped log file in your Anki profile directory. Running with targetField=None doesn't change your deck, so you can look at this file to see what is going to be done.
 
