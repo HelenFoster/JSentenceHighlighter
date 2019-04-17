@@ -9,6 +9,11 @@ from aqt import mw
 from aqt.qt import QAction
 from anki.hooks import addHook
 
+try:
+    from importlib import reload
+except:
+    pass #Python 2 has reload built-in
+
 def highlightSentences(nids):
     from . import run
     reload(run)

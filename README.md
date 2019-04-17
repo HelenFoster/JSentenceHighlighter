@@ -14,9 +14,11 @@ Instructions
 
 Be very careful with this! Back up your collection before starting, and be really sure that the addon has done what you intended before continuing with reviews.
 
-Copy JSentenceHighlighter.py and the jsentencehighlighter directory into the Anki addons directory.
+**Anki 2.1:** Copy the `jsentencehighlighter` directory into the Anki `addons21` directory.
 
-Edit config.py to match your deck. See the comments in the file for what each variable means.
+**Anki 2.0:** Copy `JSentenceHighlighter.py` and the `jsentencehighlighter` directory into the Anki `addons` directory.
+
+Edit `config.py` to match your deck. See the comments in the file for what each variable means.
 
 Restart Anki. "Highlight all sentences" should appear on the Tools menu of the main window, and "Highlight selected sentences" on the Edit menu of the browser. These run the highlighting operation as defined in config.py. Selected notes with different types than the type specified in the config will be ignored. (The config is auto-reloaded at the start of each run, so you don't need to restart Anki again after changing something.)
 

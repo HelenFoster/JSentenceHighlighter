@@ -5,6 +5,10 @@
 import re, json
 
 katakanaToHiraganaTable = {}
+try:
+    unichr
+except NameError:
+    unichr = chr
 for hIndex in range(0x3041, 0x3097):
     katakanaToHiraganaTable[unichr(hIndex+0x60)] = unichr(hIndex)
 

@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2017  Helen Foster
+# Copyright (C) 2017,2019  Helen Foster
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 import os, datetime, collections, json
 from aqt import mw
-from PyQt4.QtGui import QMessageBox
+from aqt.qt import QMessageBox
+from aqt.utils import showText
 
-def highlightSentences(browserNids=None):
-    import jsentencehighlighter.core as core
-    reload (core)
-    import jsentencehighlighter.config as conf
-    reload (conf)
+try:
+    from importlib import reload
+except:
+    pass #Python 2 has reload built-in
+
+def highlightSentences(browserNids):
+    from . import core
+    reload(core)
+    from . import config as conf
+    reload(conf)
     
     model = mw.col.models.byName(conf.noteType)
     if model is None:
@@ -63,7 +69,7 @@ def highlightSentences(browserNids=None):
     mw.progress.start(label="Working...", immediate=True)
     
     try:
-        with open(logPath, "w") as logFile:
+        with open(logPath, "wb") as logFile:
             for nid in nids:
                 note = mw.col.getNote(nid)
                 sentence = note[conf.sentenceField]
@@ -94,11 +100,13 @@ def highlightSentences(browserNids=None):
                         else:
                             note.delTag(conf.matchedTag)
                     note.flush()
-            logFile.write("\nTOTALS\n")
+            totalsReport = u""
             for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence", "wrong type"]:
-                logFile.write(outcome + "\t" + str(outcomeCounts[outcome]) + "\n")
+                totalsReport += outcome + "\t" + str(outcomeCounts[outcome]) + "\n"
+            logFile.write((u"\nTOTALS\n" + totalsReport).encode("utf-8"))
             mw.progress.finish()
-            QMessageBox.information(mw, conf.progName, "Done")
+            textToShow = totalsReport.replace("\t", ": ") + "\nwrote log file: " + logPath
+            showText(textToShow, title=conf.progName)
     except IOError:
         mw.progress.finish()
         QMessageBox.warning(mw, conf.progName, "Error writing log file")
