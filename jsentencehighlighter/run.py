@@ -101,7 +101,7 @@ def highlightSentences(browserNids):
                             note.delTag(conf.matchedTag)
                     note.flush()
             totalsReport = u""
-            for outcome in ["word 1 match", "word 2 match", "no match", "done already", "empty sentence", "wrong type"]:
+            for outcome in ["match found", "no match", "done already", "empty sentence", "wrong type"]:
                 totalsReport += outcome + "\t" + str(outcomeCounts[outcome]) + "\n"
             logFile.write((u"\nTOTALS\n" + totalsReport).encode("utf-8"))
             mw.progress.finish()

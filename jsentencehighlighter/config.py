@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2017  Helen Foster
+# Copyright (C) 2017,2019  Helen Foster
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 import os
@@ -28,6 +28,10 @@ sentenceField = "yc-sentence"
 #Can be the same as sentenceField - then tags from previous runs remain.
 #Otherwise, tags from previous runs are removed (if matchedTag is unchanged).
 targetField = None
+
+#If True, highlight all occurrences of the word (slower).
+#If False, highlight one occurrence, starting from longest version of wordField1.
+matchAll = True
 
 #Program name used in messages and the log filename.
 progName = "JSentenceHighlighter"

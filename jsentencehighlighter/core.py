@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2017  Helen Foster
+# Copyright (C) 2017,2019  Helen Foster
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 import re, json
@@ -14,6 +14,13 @@ for hIndex in range(0x3041, 0x3097):
 
 def katakanaToHiragana(s):
     return "".join([katakanaToHiraganaTable.get(ch, ch) for ch in s])
+
+def addMatch(matches, start, end):
+    for (s1, e1) in matches:
+        #prevent overlapping matches
+        if end > s1 and start < e1:
+            return
+    matches.append((start, end))
 
 class WordFinder:
     def __init__(self, conf):
@@ -42,7 +49,7 @@ class WordFinder:
                 
                 self.rules.append(newRule)
 
-    def makeInflections(self, word, wordType, depth):
+    def makeInflectionsRec(self, word, wordType, depth):
         results = [word]
         if depth == 0 or wordType == "end":
             return results
@@ -50,22 +57,36 @@ class WordFinder:
             if word.endswith(rule["kanaRaw"]):
                 if wordType == "any" or wordType in rule["typesRaw"]:
                     newWord = word[:-len(rule["kanaRaw"])] + rule["kanaInf"]
-                    results.extend(self.makeInflections(newWord, rule["typeInf"], depth-1))
+                    results.extend(self.makeInflectionsRec(newWord, rule["typeInf"], depth-1))
         return results
 
-    def findWord(self, word, sentence):
+    def makeInflections(self, word):
         if word == "":
-            return None
-        word = katakanaToHiragana(word)
-        sentence = katakanaToHiragana(sentence)
-        conjs = self.makeInflections(word, "any", self.conf.maxInflectionDepth)
+            return []
+        conjs = self.makeInflectionsRec(word, "any", self.conf.maxInflectionDepth)
         conjs.sort(key=len, reverse=True)
-        for conj in conjs:
-            if conj in sentence:
-                return (sentence.index(conj), len(conj))
-        return None
+        return conjs
 
-    def processSentence(self, word1, word2, sentence):
+    def findWord(self, word1, word2, sentence, matchAll):
+        matches = []
+        word1 = katakanaToHiragana(word1)
+        word2 = katakanaToHiragana(word2)
+        sentence = katakanaToHiragana(sentence)
+        conjs = self.makeInflections(word1) + self.makeInflections(word2)
+        for conj in conjs:
+            cursor = 0
+            while cursor < len(sentence):
+                startPos = sentence.find(conj, cursor)
+                if startPos == -1:
+                    break
+                endPos = startPos + len(conj)
+                addMatch(matches, startPos, endPos)
+                if not matchAll:
+                    return matches
+                cursor = endPos
+        return matches
+
+    def processSentence(self, word1, word2, sentence, matchAll=None):
         result = {}
         result["new sentence"] = sentence
         result["matched"] = False
@@ -74,20 +95,25 @@ class WordFinder:
         elif self.doneAlreadyFinder.search(sentence) is not None:
             result["desc"] = "done already"
         else:
-            match = self.findWord(word1, sentence)
-            if match is not None:
-                result["desc"] = "word 1 match"
-            else:
-                match = self.findWord(word2, sentence)
-                if match is not None:
-                    result["desc"] = "word 2 match"
-            if match is None:
+            if matchAll is None:
+                try:
+                    #don't crash if using old config
+                    matchAll = self.conf.matchAll
+                except:
+                    matchAll = False
+            matches = self.findWord(word1, word2, sentence, matchAll)
+            if matches == []:
                 result["desc"] = "no match"
             else:
-                (pos, length) = match
-                result["new sentence"] = sentence[:pos] + self.conf.startTag
-                result["new sentence"] += sentence[pos:pos+length]
-                result["new sentence"] += self.conf.endTag + sentence[pos+length:]
+                result["desc"] = "match found"
                 result["matched"] = True
+                matches.sort()
+                cursor = 0
+                result["new sentence"] = ""
+                for (start, end) in matches:
+                    result["new sentence"] += sentence[cursor:start] + self.conf.startTag
+                    result["new sentence"] += sentence[start:end] + self.conf.endTag
+                    cursor = end
+                result["new sentence"] += sentence[cursor:]
         return result
 
