@@ -26,7 +26,7 @@ class WordFinder:
     def __init__(self, conf):
         self.conf = conf
         self.doneAlreadyFinder = re.compile(conf.doneAlreadyRegex)
-        with open(conf.deinflectionFile) as f:
+        with open(conf.deinflectionFile, "rb") as f:
             srcdic = json.load(f)
         self.rules = []
         for reason in srcdic:
