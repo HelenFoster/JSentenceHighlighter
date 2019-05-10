@@ -105,6 +105,7 @@ def highlightSentences(browserNids):
                 totalsReport += outcome + "\t" + str(outcomeCounts[outcome]) + "\n"
             logFile.write((u"\nTOTALS\n" + totalsReport).encode("utf-8"))
             mw.progress.finish()
+            mw.reset()
             textToShow = totalsReport.replace("\t", ": ") + "\nwrote log file: " + logPath
             showText(textToShow, title=conf.progName)
     except IOError:
