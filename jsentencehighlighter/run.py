@@ -6,11 +6,15 @@ import os, datetime, collections, json
 from aqt import mw
 from aqt.qt import QMessageBox
 from aqt.utils import showText
+from anki.utils import stripHTML
 
 try:
     from importlib import reload
 except:
     pass #Python 2 has reload built-in
+
+def clean(word):
+    return stripHTML(word).strip()
 
 def highlightSentences(browserNids):
     from . import core
@@ -73,8 +77,8 @@ def highlightSentences(browserNids):
             for nid in nids:
                 note = mw.col.getNote(nid)
                 sentence = note[conf.sentenceField]
-                word1 = note[conf.wordField1]
-                word2 = "" if conf.wordField2 is None else note[conf.wordField2]
+                word1 = clean(note[conf.wordField1])
+                word2 = "" if conf.wordField2 is None else clean(note[conf.wordField2])
                 result = wordFinder.processSentence(word1, word2, sentence)
                 outcomeCounts[result["desc"]] += 1
                 logLine = result["desc"] + "\t" + word1 + "\t" + word2 + "\t" + result["new sentence"] + "\n"
