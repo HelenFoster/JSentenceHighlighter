@@ -12,13 +12,18 @@ if __name__ == "__main__":
     nakuText = u"ニャーニャー泣いていた事だけは記憶している。しばらくして泣いたら書生がまた迎に来てくれるかと考え付いた。" \
         + u"なきたくても声が出ない。大きな声で泣き出すのである。"
     trials = [
-        (u"茄子", u"なす", u"なすもついかできますか。", True),
-        (u"泣く", u"なく", nakuText, False),
-        (u"泣く", u"なく", nakuText, True),
-        (u"泣く", u"", nakuText, True),
-        (u"", u"なく", nakuText, True),
+        ([u"aa"], u"aaa", True),
+        ([u"aa"], u"aaaaa", True),
+        ([u"aa"], u"aaaaa", False),
+        ([u"aba"], u"abaaba", True),
+        ([u"aba"], u"ababa", True),
+        ([u"茄子", u"なす"], u"なすもついかできますか。", True),
+        ([u"泣く"], nakuText, True),
+        ([u"泣く"], nakuText, False),
+        ([u"なく"], nakuText, True),
+        ([u"泣く", u"なく"], nakuText, True),
     ]
     for trial in trials:
-        (word1, word2, sentence, matchAll) = trial
+        (words, sentence, matchAll) = trial
         newSentence = wf.processSentence(*trial)["new sentence"]
-        print(word1 + "\t" + word2 + "\t" + str(matchAll) + "\n" + newSentence)
+        print(u" ".join(words) + "\t" + str(matchAll) + "\n" + newSentence)

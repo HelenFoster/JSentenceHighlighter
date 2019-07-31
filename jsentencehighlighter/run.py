@@ -7,6 +7,7 @@ from aqt import mw
 from aqt.qt import QMessageBox
 from aqt.utils import showText
 from anki.utils import stripHTML
+from anki.template import furigana
 
 try:
     from importlib import reload
@@ -79,7 +80,13 @@ def highlightSentences(browserNids):
                 sentence = note[conf.sentenceField]
                 word1 = clean(note[conf.wordField1])
                 word2 = "" if conf.wordField2 is None else clean(note[conf.wordField2])
-                result = wordFinder.processSentence(word1, word2, sentence)
+                wordsDup = [word1, word2, furigana.kanji(word1), furigana.kanji(word2),
+                    furigana.kana(word1), furigana.kana(word2)]
+                words = []
+                for word in wordsDup:
+                    if word not in words:
+                        words.append(word)
+                result = wordFinder.processSentence(words, sentence)
                 outcomeCounts[result["desc"]] += 1
                 logLine = result["desc"] + "\t" + word1 + "\t" + word2 + "\t" + result["new sentence"] + "\n"
                 logFile.write(logLine.encode("utf-8"))

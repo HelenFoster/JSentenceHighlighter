@@ -67,12 +67,13 @@ class WordFinder:
         conjs.sort(key=len, reverse=True)
         return conjs
 
-    def findWord(self, word1, word2, sentence, matchAll):
+    def findWord(self, words, sentence, matchAll):
         matches = []
-        word1 = katakanaToHiragana(word1)
-        word2 = katakanaToHiragana(word2)
+        words = [katakanaToHiragana(word) for word in words]
         sentence = katakanaToHiragana(sentence)
-        conjs = self.makeInflections(word1) + self.makeInflections(word2)
+        conjs = []
+        for word in words:
+            conjs.extend(self.makeInflections(word))
         for conj in conjs:
             cursor = 0
             while cursor < len(sentence):
@@ -86,7 +87,7 @@ class WordFinder:
                 cursor = endPos
         return matches
 
-    def processSentence(self, word1, word2, sentence, matchAll=None):
+    def processSentence(self, words, sentence, matchAll=None):
         result = {}
         result["new sentence"] = sentence
         result["matched"] = False
@@ -101,7 +102,7 @@ class WordFinder:
                     matchAll = self.conf.matchAll
                 except:
                     matchAll = False
-            matches = self.findWord(word1, word2, sentence, matchAll)
+            matches = self.findWord(words, sentence, matchAll)
             if matches == []:
                 result["desc"] = "no match"
             else:
