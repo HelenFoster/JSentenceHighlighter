@@ -15,12 +15,75 @@ for hIndex in range(0x3041, 0x3097):
 def katakanaToHiragana(s):
     return "".join([katakanaToHiraganaTable.get(ch, ch) for ch in s])
 
-def addMatch(matches, start, end):
-    for (s1, e1) in matches:
-        #prevent overlapping matches
-        if end > s1 and start < e1:
-            return
-    matches.append((start, end))
+class SentenceMatches:
+    #regex based on Anki's furigana.py, but detect non-breaking spaces without replacing:
+    furiganaRegex = re.compile(r'(?:&nbsp;| )?([^ >]+?)\[(.+?)\]')
+    def __init__(self, sentence, matchAll):
+        self.sentence = sentence
+        self.matchAll = matchAll
+        mIter = SentenceMatches.furiganaRegex.finditer(sentence)
+        self.furiganaGroups = [m for m in mIter if not m.group(2).startswith("sound:")]
+        self.kanji = ""
+        cursor = 0
+        for m in self.furiganaGroups:
+            self.kanji += sentence[cursor:m.start()] + m.group(1)
+            cursor = m.end()
+        self.kanji += sentence[cursor:]
+        self.matches = []
+    def remap(self, start, end):
+        #translate kanji matches back to full sentence with furigana
+        for fGroup in self.furiganaGroups:
+            fStart = fGroup.start()
+            fEnd = fGroup.end()
+            fLength = fEnd - fStart
+            fOffset = fLength - len(fGroup.group(1))
+            if start + fOffset >= fEnd:
+                #word is after this furigana group
+                #account for the extra characters and keep going
+                start += fOffset
+                end += fOffset
+            elif end > fStart:
+                #overlaps this furigana group (overlap: end > start2 and start < end2)
+                #expand match to cover furigana (so highlight doesn't break rendering)
+                end += fOffset
+                if start > fStart:
+                    start = fStart
+                if end < fEnd:
+                    end = fEnd
+                #keep going, in case it overlaps more than one furigana group
+            else:
+                #word is before this furigana group and the remaining ones
+                break
+        return (start, end)
+    def _add(self, start, end):
+        (start, end) = self.remap(start, end)
+        for (s1, e1) in self.matches:
+            #prevent overlapping matches
+            if end > s1 and start < e1:
+                return
+        self.matches.append((start, end))
+    def check(self, conj):
+        if self.matches != [] and not self.matchAll:
+            return False
+        cursor = 0
+        found = False
+        while cursor < len(self.kanji):
+            startPos = self.kanji.find(conj, cursor)
+            if startPos == -1:
+                return found
+            endPos = startPos + len(conj)
+            self._add(startPos, endPos)
+            cursor = endPos
+            found = True
+            if not self.matchAll:
+                return found
+        return found
+    def isEmpty(self):
+        return self.matches == []
+    def __iter__(self):
+        self.matches.sort()
+        for item in self.matches:
+            yield item
 
 class WordFinder:
     def __init__(self, conf):
@@ -68,23 +131,15 @@ class WordFinder:
         return conjs
 
     def findWord(self, words, sentence, matchAll):
-        matches = []
         words = [katakanaToHiragana(word) for word in words]
         sentence = katakanaToHiragana(sentence)
+        matches = SentenceMatches(sentence, matchAll)
         conjs = []
         for word in words:
             conjs.extend(self.makeInflections(word))
         for conj in conjs:
-            cursor = 0
-            while cursor < len(sentence):
-                startPos = sentence.find(conj, cursor)
-                if startPos == -1:
-                    break
-                endPos = startPos + len(conj)
-                addMatch(matches, startPos, endPos)
-                if not matchAll:
-                    return matches
-                cursor = endPos
+            matches.check(conj)
+        #could make this more efficient for the match-once case
         return matches
 
     def processSentence(self, words, sentence, matchAll=None):
@@ -103,12 +158,11 @@ class WordFinder:
                 except:
                     matchAll = False
             matches = self.findWord(words, sentence, matchAll)
-            if matches == []:
+            if matches.isEmpty():
                 result["desc"] = "no match"
             else:
                 result["desc"] = "match found"
                 result["matched"] = True
-                matches.sort()
                 cursor = 0
                 result["new sentence"] = ""
                 for (start, end) in matches:
