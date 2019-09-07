@@ -19,6 +19,10 @@ class TestWordFinder(unittest2.TestCase):
             (([u"aa"],  u"aa[xx] aa[xx]", True), u"<b>aa[xx]</b><b> aa[xx]</b>"),
             (([u"a"],   u"a[xx] aa[xx]", True), u"<b>a[xx]</b><b> aa[xx]</b>"),
             (([u"bb"],  u"a abb[xxx]a bba[xxx]a", True), u"a<b> abb[xxx]</b>a<b> bba[xxx]</b>a"),
+            (([u"aa"],  u"a[x] a[x]", True), u"<b>a[x] a[x]</b>"),
+            (([u"aa"],  u"b a[x] a[x]a", True), u"b<b> a[x] a[x]</b>a"),
+            (([u"aa"],  u"ba[x] a[x]a", True), u"<b>ba[x] a[x]</b>a"),
+            (([u"aa"],  u"aa a[x] a[x]", True), u"<b>aa</b><b> a[x] a[x]</b>"),
             (([u"茄子", u"なす"], u"なすもついかできますか。", True), u"<b>なす</b>もついかできますか。"),
         ]
         for i in range(len(cases)):
