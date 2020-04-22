@@ -7,7 +7,7 @@ from aqt import mw
 from aqt.qt import QMessageBox
 from aqt.utils import showText
 from anki.utils import stripHTML
-from anki.template import furigana
+from . import furigana
 
 try:
     from importlib import reload
